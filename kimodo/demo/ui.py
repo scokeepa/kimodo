@@ -844,6 +844,12 @@ def create_gui(
                         local_rot_77 = skel30.to_SOMASkeleton77(local_rot_30)
                         root_positions = joints_pos[:, skel30.root_idx, :]
                         joints_rot, joints_pos, _ = session.skeleton.fk(local_rot_77, root_positions)
+
+                        if foot_contacts is not None and foot_contacts.shape[-1] == 4:
+                            foot_contacts = torch.cat(
+                                [foot_contacts[..., :2], foot_contacts[..., 1:2],
+                                 foot_contacts[..., 2:4], foot_contacts[..., 3:4]], dim=-1
+                            )
                     else:
                         raise ValueError(
                             f"The loaded motion has {num_joints_loaded} joints but the current model "
@@ -3073,7 +3079,7 @@ def create_gui(
                 return
             session = demo.client_sessions[client_id]
             for motion in session.motions.values():
-                motion.character.set_show_foot_contacts(gui_viz_foot_contacts_checkbox.value)
+                motion.character.set_show_foot_contacts(gui_viz_foot_contacts_checkbox.value, frame_idx=motion.cur_frame_idx)
 
         @gui_viz_skinned_mesh_checkbox.on_update
         def _(_) -> None:

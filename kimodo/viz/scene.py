@@ -487,8 +487,11 @@ class Character:
         if self.skeleton_mesh is not None:
             self.skeleton_mesh.set_visibility(visible)
 
-    def set_show_foot_contacts(self, show: bool):
+    def set_show_foot_contacts(self, show: bool, frame_idx: Optional[int] = None):
         self.show_foot_contacts = show
+        if self.skeleton_mesh is not None and self.cur_joints_pos is not None:
+            fc = self.cur_foot_contacts if show else None
+            self.skeleton_mesh.set_pose(self.cur_joints_pos, foot_contacts=fc, frame_idx=frame_idx)
 
     def set_skinned_mesh_visibility(self, visible: bool):
         if self.skinned_mesh is not None:
@@ -531,9 +534,9 @@ class Character:
         frame_idx: Optional[int] = None,
     ):
         if self.skeleton_mesh is not None:
-            cur_foot_contacts = foot_contacts if self.show_foot_contacts else None
-            self.skeleton_mesh.set_pose(joints_pos, foot_contacts=cur_foot_contacts, frame_idx=frame_idx)
-            self.cur_foot_contacts = cur_foot_contacts
+            self.cur_foot_contacts = foot_contacts
+            display_fc = foot_contacts if self.show_foot_contacts else None
+            self.skeleton_mesh.set_pose(joints_pos, foot_contacts=display_fc, frame_idx=frame_idx)
 
         if self.skinned_mesh is not None:
             if self.skinned_verts_cache is not None:
