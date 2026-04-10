@@ -35,8 +35,11 @@ class LLM2VecEncoder:
             peft_model_name_or_path=peft_model_name_or_path,
             torch_dtype=torch_dtype,
             cache_dir=cache_dir,
-            device_map=device,
         )
+        if device is not None:
+            if device == "auto":
+                device = "cuda" if torch.cuda.is_available() else "cpu"
+            self.model = self.model.to(device)
         self.model.eval()
         for p in self.model.parameters():
             p.requires_grad = False
